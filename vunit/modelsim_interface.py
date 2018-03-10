@@ -277,7 +277,7 @@ proc vunit_load {{{{vsim_extra_args ""}}}} {{
         return 1
     }}
 
-    set no_vhdl_test_runner_exit [catch {{examine -internal {{/run_pkg/runner.exit_without_errors}}}}]
+    set no_vhdl_test_runner_exit [catch {{examine -internal {{/run_pkg/runner}}}}]
     set no_verilog_test_runner_exit [catch {{examine -internal {{/vunit_pkg/__runner__}}}}]
 
     if {{${{no_vhdl_test_runner_exit}} && ${{no_verilog_test_runner_exit}}}}  {{
@@ -317,22 +317,20 @@ proc _vunit_run {} {
     }
     onbreak {on_break}
 
-    set has_vhdl_runner [expr ![catch {examine -internal {/run_pkg/runner.exit_without_errors}}]]
+    set has_vhdl_runner [expr ![catch {examine -internal {/run_pkg/runner}}]]
     set has_verilog_runner [expr ![catch {examine -internal {/vunit_pkg/__runner__}}]]
 
     if {${has_vhdl_runner}} {
-        set status_boolean {/run_pkg/runner.exit_without_errors}
-        set true_value TRUE
+        set status_boolean {/run_pkg/runner(1)}
     } elseif {${has_verilog_runner}} {
         set status_boolean {/vunit_pkg/__runner__.exit_without_errors}
-        set true_value 1
     } else {
         echo "No finish mechanism detected"
         return 1;
     }
 
     run -all
-    set failed [expr [examine -radix unsigned -internal ${status_boolean}]!=${true_value}]
+    set failed [expr {[examine -radix unsigned -internal ${status_boolean}]!=1}]
     if {$failed} {
         catch {
             # tb command can fail when error comes from pli

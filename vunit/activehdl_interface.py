@@ -232,7 +232,7 @@ proc vunit_load {{}} {{
     global builtinbreakassertlevel
     set builtinbreakassertlevel $breakassertlevel
 
-    set no_vhdl_test_runner_exit [catch {{examine /run_pkg/runner.exit_without_errors}}]
+    set no_vhdl_test_runner_exit [catch {{examine /run_pkg/runner}}]
     if {{${{no_vhdl_test_runner_exit}}}}  {{
         echo {{Error: No vunit test runner package used}}
         return 1
@@ -255,15 +255,14 @@ proc vunit_run {} {
     set has_vhdl_runner [expr ![catch {examine /run_pkg/runner}]]
 
     if {${has_vhdl_runner}} {
-        set status_boolean "/run_pkg/runner.exit_without_errors"
-        set true_value true
+        set status_boolean "/run_pkg/runner(1)"
     } else {
         echo "No finish mechanism detected"
         return 1;
     }
 
     run -all
-    set failed [expr [examine ${status_boolean}]!=${true_value}]
+    set failed [expr {[examine ${status_boolean}]!=1}]
     if {$failed} {
         catch {
             # tb command can fail when error comes from pli
